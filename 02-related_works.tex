@@ -8,7 +8,15 @@ Similarly, self-reconfigurable modular robots have been proposed for generality 
 Despite its promise, true deployment of self-reconfigurable systems in real-world SAR remains limited. Challenges include durable docking mechanisms, distributed control, and scalability to many modules. A 2002 survey \cite{wiredBots2002} noted that while modular robots offered versatility, practical issues such as module complexity and control reliability were significant obstacles \cite{}. Nonetheless, ongoing research -- such as morphogenetic and CPG-controlled modular designs \cite{CPGLocomotion} -- continues to push capabilities, targeting robustness and autonomy in SAR and field robotics applications.
 
 \subsection{Acoustic-Based Victim Detection}
-TODO: manuella
+Acoustic sensing has emerged as a viable modality for victim detection in search and rescue (SAR) robotics, particularly in environments where vision systems may fail due to occlusions, smoke, or debris. Voice activity, breathing, or other human-generated sounds can be leveraged to identify the presence and location of victims trapped in disaster zones.
+
+Recent advances in machine learning, particularly TinyML—machine learning models deployed on microcontrollers—have enabled real-time, low-power voice detection suitable for edge robotics. For instance, Banbury et al.~\cite{Banbury2021micronets} introduced MicroNets, a family of compact convolutional networks for keyword spotting and acoustic event detection on microcontrollers. Similarly, Warden et al.~\cite{Warden2018speech} demonstrated the feasibility of neural network-based speech recognition on constrained devices, which has been widely adopted for embedded voice interfaces.
+
+On the embedded TinyML front, compact neural networks have been developed for audio classification on microcontrollers. For example, Barovic and Moin~\cite{Barovic2025tinyml} proposed a quantized 1D convolutional neural network capable of recognizing up to 23 speech commands and successfully deployed it on the Arduino Nano 33 BLE Sense using the Edge Impulse pipeline. The model achieved around 97\% accuracy in real-time inference with a footprint suitable for deployment on microcontrollers. Similarly, Viswanatha et al.~\cite{Viswanatha2022tinyml} demonstrated the implementation of TinyML-based voice keyword recognition—specifically “yes”, “no”, and “other”—on the same microcontroller platform using mel-spectrogram features and TensorFlow Lite Micro.
+
+Although these works are not explicitly designed for search-and-rescue (SAR), they confirm the feasibility of real-time audio inference on resource-constrained embedded systems. Such findings support the potential application of embedded acoustic detection in autonomous SAR robotics.
+
+In summary, the integration of acoustic-based detection using TinyML in robotics presents a lightweight and effective approach for real-time victim localization. Its advantages in terms of energy efficiency, low latency, and deployability on embedded hardware make it a promising direction for autonomous SAR systems.
 
 \subsection{Indoor Localization in GPS-Denied Environments}
 TODO: obed \cite{WSNCentroid} ini sitasi ke paper yang dipake di ppt mu
