@@ -1,2 +1,25 @@
 \section{Methodology}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus gravida, elit ac porttitor ullamcorper, neque urna accumsan tellus, ut placerat sapien neque et est. Curabitur aliquet sem sed metus bibendum, eu tristique magna aliquam. Mauris quis nunc semper, suscipit est at, mollis neque. Pellentesque ut justo ac nisl semper tempus. Duis pretium enim at elit imperdiet, sagittis fringilla diam tempus. Sed fringilla finibus elit, vel rutrum tortor ullamcorper convallis. Etiam in turpis maximus, suscipit ipsum ut, feugiat mi. Sed ullamcorper diam quis ipsum scelerisque faucibus sed at ligula. Morbi lorem lorem, maximus ut mollis nec, tempor a libero. Sed vehicula fringilla metus vitae pharetra. Suspendisse tempor vitae orci id facilisis. Aliquam sed sem vel dui vehicula sagittis ac quis libero. Sed suscipit ipsum at pulvinar tempus. Cras ultrices accumsan libero lacinia vehicula.
+
+\subsection{Human Voice Detection Model Preparation}
+This study focuses on developing a lightweight acoustic model capable of distinguishing between human and non-human sounds for search-and-rescue (SAR) robotics. The model is optimized for deployment on edge devices using TinyML frameworks. The training pipeline involves dataset preparation, feature extraction, data augmentation, and supervised learning.
+
+\subsubsection{Dataset Collection and Labeling}
+We utilized a subset of the publicly available CHiME-Home dataset~\cite{Foster2015chime}, which contains domestic environmental audio recordings annotated with sound event labels. Audio segments featuring human vocal activity such as speech, calling, or shouting were manually extracted and labeled as “human,” while other segments (e.g., background noise, domestic appliances, animals) were labeled as “non-human.” The dataset was further balanced and curated to ensure consistent segment lengths of three seconds at a sampling rate of 16\,kHz.
+
+\subsubsection{Spectrogram Feature Extraction}
+To convert the audio signals into a format suitable for convolutional neural networks (CNNs), we applied mel-spectrogram transformation. Each audio clip was transformed into a 64-bin mel-spectrogram using a short-time Fourier transform (STFT) with parameters tuned for low-latency environments. The resulting spectrograms were normalized to a \([0, 1]\) range after applying logarithmic scaling and clipping to \([-80, 0]\) dB.
+
+\subsubsection{Data Augmentation}
+To improve generalization and robustness in noisy or reverberant environments, two augmentation strategies were employed:
+
+\begin{itemize}
+  \item \textbf{Additive Gaussian Noise:} Small random noise was added to spectrograms to simulate environmental interference.
+  \item \textbf{Time Masking:} Inspired by SpecAugment~\cite{Park2019specaugment}, random temporal sections of spectrograms were zeroed out to simulate partial occlusion of acoustic features.
+\end{itemize}
+
+Each original spectrogram generated two augmented variants, tripling the effective dataset size.
+
+\subsubsection{Model Training and Evaluation}
+The dataset was split using stratified sampling into training and testing subsets (80\% / 20\%). The model architecture consisted of a compact 2D convolutional neural network designed to fit within the memory constraints of embedded hardware. The input shape was fixed at $64 \times 64 \times 1$. The model was trained using binary cross-entropy loss and Adam optimizer, with early stopping and learning rate reduction callbacks to prevent overfitting.
+
+Evaluation was performed on the held-out test set using standard classification metrics including accuracy, precision, recall, F1-score, and confusion matrix. The final model achieved a test accuracy of 97.79\%, demonstrating strong generalization performance in distinguishing human from non-human sounds.
