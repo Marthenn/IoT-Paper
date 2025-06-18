@@ -23,3 +23,25 @@ Each original spectrogram generated two augmented variants, tripling the effecti
 The dataset was split using stratified sampling into training and testing subsets (80\% / 20\%). The model architecture consisted of a compact 2D convolutional neural network designed to fit within the memory constraints of embedded hardware. The input shape was fixed at $64 \times 64 \times 1$. The model was trained using binary cross-entropy loss and Adam optimizer, with early stopping and learning rate reduction callbacks to prevent overfitting.
 
 Evaluation was performed on the held-out test set using standard classification metrics including accuracy, precision, recall, F1-score, and confusion matrix. The final model achieved a test accuracy of 97.79\%, demonstrating strong generalization performance in distinguishing human from non-human sounds.
+
+\subsection{Weighted Centroid Localization}
+We collected RSSI measurements in an indoor corridor (Labtek 1 Mekanika Tanah, ITB) using three fixed ESP32 beacons and one mobile ESP32 receiver. Measurements were taken at five known distances (1.60m, 2.40m, 3.20m, 4.00m, 4.80m) yielding a total of 1574 samples. Each sample consists of the RSSI value from a beacon at a given distance. These raw RSSI values were then preprocessed to support distance estimation: \begin{itemize}
+
+\item {\bf Log-distance transform:} We converted the RSSI (in dBm) to an equivalent distance using the log-distance path-loss model. In practice, this means modeling $\text{RSSI}\approx -10n\log_{10}(d)+C$ (where $n$ is the path-loss exponent) to linearize the RSSI–distance relationship
+
+\item {\bf Gaussian noise injection:} To improve robustness against channel variations, we added small zero-mean Gaussian noise to the RSSI samples during preprocessing. Prior work shows that training with artificial noise can yield more stable distance estimates.
+
+\item {\bf Synthetic data augmentation:} We generated additional (synthetic) RSSI-distance pairs by interpolating between measured values so that the full RSSI range was covered uniformly. This ensures that the neural network sees examples spanning the entire operating spectrum of RSSI values.
+
+\end{itemize} After preprocessing, we trained a separate neural network model for each beacon. Each model is an 8-layer fully connected (feedforward) neural network implemented in TensorFlow. The network takes the preprocessed RSSI as input and outputs a predicted distance. All hidden layers use ReLU activation and the final layer is linear. Inputs were standardized (zero mean, unit variance) before training to improve convergence. This MLP approach is similar to prior RSSI‐localization work.
+
+\begin{figure}[!b]
+  \centering
+  \includegraphics[width=0.5\linewidth]{img/fig2.jpg}
+  \caption{Centroid positioning. D showing the possible positions of the robot, from beacon A, B, and C \cite{WSNCentroid}}
+  \label{fig:centroid}
+\end{figure}
+
+We trained each model on the 1574-sample dataset (combining all distances) and reserved a held-out set of 236 real (non-synthetic) measurements for testing. During training, we optimized with a standard gradient-based optimizer (e.g.\ Adam) until convergence. For localization, each beacon’s predicted distance defines a circle around that beacon with radius equal to the estimated distance. We then apply the triangle‐centroid method: the unknown tag is located at the centroid of the intersection region of the three circles. As Zhang and Zhao \cite{WSNCentroid} describe, the algorithm uses RSSI to measure distances $d$, treats the beacon node as the center of a circle, the distance $d$ as the radius of each circle, and obtains the unknown node location by seeking the centroid of the three-circle intersection. 
+
+In practice we compute the pairwise intersection points of the circles and take their centroid as the position estimate. To reduce bias from larger errors at greater distances, we apply a distance-based weighting: intersections involving shorter predicted distances are given higher weight (i.e.\ weight $\propto 1/d$) when computing the centroid. This follows the idea of weighted centroid localization \cite{nagah2021enhanced}. The final estimated coordinates are thus a weighted centroid of the three-circle intersection, which yields a single $(x,y)$ position. All steps above—from data collection through model training and localization—were implemented in TensorFlow and evaluated using the held-out test set of 236 samples. Performance was reported as the error between the true and estimated positions in the lab.
