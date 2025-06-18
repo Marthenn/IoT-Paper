@@ -42,3 +42,39 @@ The confusion matrix in Table~\ref{tab:confusion} further illustrates the model�
 The model shows strong recall for the human class (98.37\%), meaning it rarely misses vocal sounds in unseen test data—an important trait in SAR applications where false negatives (missed detections) are critical. The false positive rate is also low, indicating robustness against confusing non-human sounds.
 
 These results confirm that a mel-spectrogram-based convolutional neural network, trained on real-world domestic sounds, can effectively distinguish human from non-human audio cues. The use of data augmentation techniques (e.g., time masking and additive noise) likely contributed to the model's generalization ability under variable acoustic conditions. Given its high accuracy and efficiency, this model is suitable for real-time deployment in embedded robotic platforms.
+
+\subsection{Weighted Centroid Localization Evaluation}
+
+\subsubsection{Regression Performance of RSSI–Distance Models}
+
+Table ~\ref{tab:beacon_metrics} summarizes the test performance of the three per‑beacon neural models, evaluated both in log‑scale and converted to absolute error in centimeters.
+
+\begin{table}[ht]
+\centering
+\caption{Test metrics for each beacon’s RSSI–distance regression model.}
+\label{tab:beacon_metrics}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Beacon} & \textbf{MSE$ {\log}$} & \textbf{MAE ${\log}$} & \textbf{MAE (cm)} \\
+\midrule
+A & 0.00610 & 0.08499 & 45.16 \\
+B & 0.00469 & 0.07139 & 47.08 \\
+C & 0.01152 & 0.12102 & 63.36 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Beacon-B achieves the lowest log‑scale MSE (0.0047) and MAE (0.0714), corresponding to an average distance error of about 47cm. Beacon-A is similar, with an MAE of 45cm. Beacon-C shows higher error (63cm), likely due to more variable signal propagation in its placement region. Overall, the per‑beacon regressors yield sub‑meter accuracy on the held‑out test set, demonstrating that the log‑distance model plus neural refinement can predict distance to within roughly 0.5m on average.
+
+\subsubsection{Impact on Localization Accuracy}
+
+When these distance estimates are used in the weighted triangle‑centroid localization, the variation in per‑beacon error propagates into the final position estimate.  In particular, Beacon-C’s larger MAE contributes more uncertainty to the intersection region.  However, by weighting each beacon inversely to its predicted radius, the algorithm down‑weights less reliable beacons, mitigating the impact of higher error sources.
+
+\begin{itemize}
+\item \textbf{Relative model quality.}  The discrepancy between Beacon-C and the other two beacons underscores the importance of environmental factors (e.g.\ obstructions or multipath) at each anchor.  In practice, anchors should be sited to minimize variability or supplemented with additional measurements (e.g.\ more samples or alternate channels).
+\item \textbf{Localization robustness.}  Employing a weighted centroid ensures that beacons with consistently better predictions (A and B) dominate the final estimate, leading to more stable and accurate positions than a simple unweighted centroid.
+\item \textbf{Short‑range suitability.}  Although sub‑meter ranging error is larger than specialized UWB systems, our approach uses only low‑cost ESP32 hardware and standard RSSI measurements.  This makes it well suited for applications where compact, battery‑powered nodes must be deployed without additional infrastructure.
+
+\end{itemize}
+
+Our experiments demonstrate that an RSSI‑based neural distance estimator, when paired with a weighted triangle‑centroid localization, yields reliable indoor positioning with average errors around 0.5m using only commodity ESP32 devices. However, these results are highly location‑dependent: when we deployed the same models in a different indoor environment (with distinct geometry and interference characteristics), the positioning accuracy degraded significantly, producing erratic and unreliable estimates. Thus, practical application will require per‑site calibration or adaptation to maintain sub‑meter performance.
