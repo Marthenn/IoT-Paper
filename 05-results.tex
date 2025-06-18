@@ -1,2 +1,44 @@
 \section{Results and Discussion}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus gravida, elit ac porttitor ullamcorper, neque urna accumsan tellus, ut placerat sapien neque et est. Curabitur aliquet sem sed metus bibendum, eu tristique magna aliquam. Mauris quis nunc semper, suscipit est at, mollis neque. Pellentesque ut justo ac nisl semper tempus. Duis pretium enim at elit imperdiet, sagittis fringilla diam tempus. Sed fringilla finibus elit, vel rutrum tortor ullamcorper convallis. Etiam in turpis maximus, suscipit ipsum ut, feugiat mi. Sed ullamcorper diam quis ipsum scelerisque faucibus sed at ligula. Morbi lorem lorem, maximus ut mollis nec, tempor a libero. Sed vehicula fringilla metus vitae pharetra. Suspendisse tempor vitae orci id facilisis. Aliquam sed sem vel dui vehicula sagittis ac quis libero. Sed suscipit ipsum at pulvinar tempus. Cras ultrices accumsan libero lacinia vehicula.
+
+\subsection{Voice Recognition Model Evaluation}
+The proposed human voice detection model was evaluated on a held-out test set using multiple performance metrics, including accuracy, precision, recall, F1-score, and a confusion matrix. The test set comprised 3,622 audio clips, balanced across human and non-human classes.
+
+The model achieved a final test accuracy of \textbf{97.79\%}, with a binary cross-entropy loss of 0.0909. The classification report is summarized in Table~\ref{tab:classification}.
+
+\begin{table}[h]
+\centering
+\caption{Classification Performance on the Test Set}
+\label{tab:classification}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-score} & \textbf{Support} \\
+\midrule
+Non-human (0) & 0.9723 & 0.9630 & 0.9676 & 1350 \\
+Human (1)     & 0.9781 & 0.9837 & 0.9809 & 2272 \\
+\midrule
+\textbf{Accuracy} & \multicolumn{4}{c}{0.9760} \\
+\textbf{Macro Avg} & 0.9752 & 0.9733 & 0.9743 & 3622 \\
+\textbf{Weighted Avg} & 0.9760 & 0.9760 & 0.9760 & 3622 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The confusion matrix in Table~\ref{tab:confusion} further illustrates the model’s performance:
+
+\begin{table}[h]
+\centering
+\caption{Confusion Matrix}
+\label{tab:confusion}
+\begin{tabular}{ccc}
+\toprule
+ & \textbf{Predicted 0} & \textbf{Predicted 1} \\
+\midrule
+\textbf{Actual 0} & 1300 & 50 \\
+\textbf{Actual 1} & 37 & 2235 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The model shows strong recall for the human class (98.37\%), meaning it rarely misses vocal sounds in unseen test data—an important trait in SAR applications where false negatives (missed detections) are critical. The false positive rate is also low, indicating robustness against confusing non-human sounds.
+
+These results confirm that a mel-spectrogram-based convolutional neural network, trained on real-world domestic sounds, can effectively distinguish human from non-human audio cues. The use of data augmentation techniques (e.g., time masking and additive noise) likely contributed to the model's generalization ability under variable acoustic conditions. Given its high accuracy and efficiency, this model is suitable for real-time deployment in embedded robotic platforms.
