@@ -1,6 +1,6 @@
 \section{Methodology}
 
-\subsection{Human Voice Detection Model Preparation}
+\subsection{Human Voice Detection Model}
 This study focuses on developing a lightweight acoustic model capable of distinguishing between human and non-human sounds for search-and-rescue (SAR) robotics. The model is optimized for deployment on edge devices using TinyML frameworks. The training pipeline involves dataset preparation, feature extraction, data augmentation, and supervised learning.
 
 \subsubsection{Dataset Collection and Labeling}
@@ -8,6 +8,21 @@ We utilized a subset of the publicly available CHiME-Home dataset~\cite{Foster20
 
 \subsubsection{Spectrogram Feature Extraction}
 To convert the audio signals into a format suitable for convolutional neural networks (CNNs), we applied mel-spectrogram transformation. Each audio clip was transformed into a 64-bin mel-spectrogram using a short-time Fourier transform (STFT) with parameters tuned for low-latency environments. The resulting spectrograms were normalized to a \([0, 1]\) range after applying logarithmic scaling and clipping to \([-80, 0]\) dB.
+
+The mel-spectrogram extraction process can be summarized as follows:
+
+\begin{verbatim}
+for each audio file in dataset:
+    load audio at 16kHz mono
+    if audio is empty:
+        skip file
+    compute mel-spectrogram with 64 mel bands
+    convert to decibel (log) scale
+    clip values to [-80, 0] dB
+    normalize to [0, 1] range
+    resize to 64x64 using interpolation
+    save as .npy file
+\end{verbatim}
 
 \subsubsection{Data Augmentation}
 To improve generalization and robustness in noisy or reverberant environments, two augmentation strategies were employed:
@@ -21,6 +36,32 @@ Each original spectrogram generated two augmented variants, tripling the effecti
 
 \subsubsection{Model Training and Evaluation}
 The dataset was split using stratified sampling into training and testing subsets (80\% / 20\%). The model architecture consisted of a compact 2D convolutional neural network designed to fit within the memory constraints of embedded hardware. The input shape was fixed at $64 \times 64 \times 1$. The model was trained using binary cross-entropy loss and Adam optimizer, with early stopping and learning rate reduction callbacks to prevent overfitting.
+
+The model architecture consisted of a series of convolutional and normalization layers, followed by pooling and fully connected layers. A detailed summary of the model is as follows:
+
+\begin{itemize}
+  \item \textbf{Input:} $64 \times 64 \times 1$ grayscale mel-spectrogram
+  \item \textbf{Conv2D:} 32 filters, $3 \times 3$ kernel, ReLU activation
+  \item \textbf{BatchNormalization}
+  \item \textbf{Conv2D:} 32 filters, $3 \times 3$ kernel, ReLU activation
+  \item \textbf{BatchNormalization}
+  \item \textbf{MaxPooling2D:} $2 \times 2$
+  \item \textbf{Conv2D:} 64 filters, $3 \times 3$ kernel, ReLU activation
+  \item \textbf{BatchNormalization}
+  \item \textbf{Conv2D:} 64 filters, $3 \times 3$ kernel, ReLU activation
+  \item \textbf{BatchNormalization}
+  \item \textbf{MaxPooling2D:} $2 \times 2$
+  \item \textbf{Conv2D:} 128 filters, $3 \times 3$ kernel, ReLU activation
+  \item \textbf{BatchNormalization}
+  \item \textbf{Conv2D:} 128 filters, $3 \times 3$ kernel, ReLU activation
+  \item \textbf{BatchNormalization}
+  \item \textbf{GlobalAveragePooling2D}
+  \item \textbf{Dense:} 128 units, ReLU activation
+  \item \textbf{Dropout:} rate 0.5
+  \item \textbf{Output:} Dense layer with 1 unit and sigmoid activation
+\end{itemize}
+
+The model was compiled with the Adam optimizer (learning rate = 0.0005) and binary cross-entropy loss. To address class imbalance, class weights were applied during training. Early stopping (patience = 10) and learning rate reduction on plateau (patience = 5, factor = 0.5) were employed to enhance convergence. The final model was trained over a maximum of 50 epochs with a batch size of 64.
 
 Evaluation was performed on the held-out test set using standard classification metrics including accuracy, precision, recall, F1-score, and confusion matrix. The final model achieved a test accuracy of 97.79\%, demonstrating strong generalization performance in distinguishing human from non-human sounds.
 
