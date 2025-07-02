@@ -36,8 +36,24 @@ The localization infrastructure consists of three stationary beacons, each built
   \end{tabular}
 \end{table*}
 
+\begin{figure}[!b]
+  \centering
+  \includegraphics[width=0.65\linewidth]{img/layer.png}
+  \caption{The layered IoT architecture of the system, showing the hierarchy from high-level application interfaces down to the physical perception and actuation components}
+  \label{fig:layering}
+\end{figure}
+
 \subsection{Software and Data Flow}
-The robot's software architecture employs a hybrid approach, utilizing custom Python scripts for primary logic, the MQTT protocol for lightweight inter-process communication, and some elements of the Robot Operating System (ROS) for hardware interfacing. The audio classification task on the Raspberry Pi is implemented using the TensorFlow library.
+The robot's architecture is organized into a four-tiered IoT stack, as illustrated in Fig.~\ref{fig:layering}. This layered approach separates high-level applications from the underlying hardware, promoting modularity. The stack consists of: the Application layer (user-facing dashboard and controller), the Middleware layer (handling data exchange via MQTT, Robot Operating System (ROS) 2, Micro-ROS, and WebSockets), the Communication layer (Wi-Fi and Serial USB), and the Perception \& Actuation Layer (physical sensors and actuators).
+
+\begin{figure*}[!htbp]
+  \centering
+  \includegraphics[width=0.65\textwidth]{img/DFD.png}
+  \caption{A detailed block diagram of the software components and data flow. The MQTT Broker on the Raspberry Pi acts as a central hub, routing data such as commands, position, and sound detection between the various hardware and software modules.}
+  \label{fig:dfd}
+\end{figure*}
+
+The operational data flow between the primary software modules is managed using a hybrid approach that combines custom Python scripts, the MQTT protocol for lightweight messaging, and elements of the ROS for hardware interfacing. The specific interactions are detailed in Fig.~\ref{fig:dfd}. The audio classification task on the Raspberry Pi is implemented using the TensorFlow library.
 
 The operational flow of the system is continuous and concurrent:
 \begin{enumerate}
