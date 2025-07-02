@@ -5,7 +5,7 @@ The proposed human voice detection model was evaluated on a held-out test set us
 
 The model achieved a final test accuracy of \textbf{97.79\%}, with a binary cross-entropy loss of 0.0909. The classification report is summarized in Table~\ref{tab:classification}.
 
-\begin{table}[h]
+\begin{table}[t]
 \centering
 \caption{Classification Performance on the Test Set}
 \label{tab:classification}
@@ -25,7 +25,7 @@ Human (1)     & 0.9781 & 0.9837 & 0.9809 & 2272 \\
 
 The confusion matrix in Table~\ref{tab:confusion} further illustrates the model’s performance:
 
-\begin{table}[h]
+\begin{table}[t]
 \centering
 \caption{Confusion Matrix}
 \label{tab:confusion}
@@ -49,7 +49,7 @@ These results confirm that a mel-spectrogram-based convolutional neural network,
 
 Table ~\ref{tab:beacon_metrics} summarizes the test performance of the three per‑beacon neural models, evaluated both in log‑scale and converted to absolute error in centimeters.
 
-\begin{table}[ht]
+\begin{table}[t]
 \centering
 \caption{Test metrics for each beacon’s RSSI–distance regression model.}
 \label{tab:beacon_metrics}
