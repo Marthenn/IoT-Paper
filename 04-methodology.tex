@@ -95,3 +95,21 @@ We trained each model on the 1574-sample dataset (combining all distances) and r
 In practice we compute the pairwise intersection points of the circles and take their centroid as the position estimate. To reduce bias from larger errors at greater distances, we apply a distance-based weighting: intersections involving shorter predicted distances are given higher weight when computing the centroid. This follows the idea of weighted centroid localization \cite{nagah2021enhanced}. The final estimated coordinates are thus a weighted centroid of the three-circle intersection, which yields a single $(x,y)$ position. All steps above—from data collection through model training and localization—were implemented in TensorFlow and evaluated using the held-out test set of 236 samples. Performance was reported as the error between the true and estimated positions in the lab.
 
 To evaluate generalization, we also performed \emph{cross-environment testing}: after training exclusively in the Labtek 1 environment, we deployed the same models and localization pipeline in a different indoor space as shown in Fig.~\ref{fig:environment}. RSSI data were collected at the same five distances under this new setting, and localization accuracy was measured without any retraining. This assessment demonstrates the robustness of our distance regression and weighted triangle-centroid method to changes in multipath and clutter.
+
+The ESP-32 positioning workflow can be expressed as follows:
+\begin{lstlisting}
+loop forever:
+    beacons <- wifi_scan_beacons()
+    foreach beacon in beacons:
+        distances[beacon.ssid] <-
+            model_predict_distance(beacon.rssi)
+    beacons_position_relative <-
+        get_beacons_relative_position(
+            beacons_position_fixed,
+            distances
+        )
+
+    send_uart(beacons_position_relative)
+		
+    wait for 1 second
+\end{lstlisting}
